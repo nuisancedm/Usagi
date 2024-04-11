@@ -19,4 +19,11 @@ git submodule add https://github.com/gabime/spdlog Usagi/vendor/spdlog
 
 * 新建Log.h Log.cpp, 封装了spdlog 并用定义了log宏
 
-
+#### 4/11/2024 premake
+* 新建premake5.lua,复制dll修改成
+```lua
+postbuildcommands{
+            "copy /B /Y ..\\bin\\" .. outputdir .. "\\Usagi\\Usagi.dll ..\\bin\\" .. outputdir .. "\\Sandbox\\ > nul"
+        }
+```
+* 新建GenerateProject.bat
