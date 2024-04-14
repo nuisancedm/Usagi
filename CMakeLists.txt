@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 指定使用的是g++编译器
 # set(CMAKE_CXX_COMPILER "g++")
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # 构建类型，如果未指定，默认为 Release
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

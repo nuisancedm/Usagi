@@ -1,6 +1,6 @@
 #vscode
 build
-
+.vscode
 # Binaries
 **/bin/
 bin_int/
