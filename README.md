@@ -27,3 +27,10 @@ postbuildcommands{
         }
 ```
 * 新建GenerateProject.bat
+
+#### 04/14/2024 event system plan
+currently，we have an APPLICATION. the APPLICATION will dispatch an event to a layer(we do the layer later) .  
+and, we have a WINDOW, the WINDOW is the place where the events really happen. whenever a event happen in the WINDOW, the window class should aware that and conmunicate that event to our APPLICATION.
+
+however we dont want to tie the APPLICATION to out WINDOW class. the WINDOW shouldn't aware anything of out APPLICATION.
+the application create the window. 
