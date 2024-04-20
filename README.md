@@ -1,33 +1,9 @@
 # Usagi
-## DAIRY
-#### 4/8/2024 Add Entry point 
-* 新增Core.h, 用宏封装了__declspec(dllexport)和__declspec(dllimport)
-* 新增Usagi.h, 供外部应用使用，包含了所有应用程序应该引入的头文件
-* 新增Application.h，Application类由外部应用集成并实现部分函数
-* 新增EntryPoint.h，作为头文件main函数，将会被外部应用引入
+## 编译
+Sandbox通过包含Usagi提供的头文件来获取类，函数原型，常量定义， Sandbox获取的来自Usagi的头文件，就是Usagi库提供的接口，使得Sandbox直到该如何调用Usagi的功能，这些头文件只包含了接口的声明，而不包含具体实现。  
 
-####  4/11/2024 Add Logging system
-我们想要在控制台输出信息，程序运行的信息，shader加载的信息等等。
-当程序运行出错的时候，我们想要程序告诉我们。
-通过gitsubmodule的方式使用spdlog作为usagi的logging system
-打开CMD
-```C++
-git submodule add https://github.com/gabime/spdlog Usagi/vendor/spdlog
-```
-我们为usagi和sandbox同时引入include文件夹
-下一步我们会重新封装spdlog，我们希望修改API，用我们自己的方式调用log，比如Usagi::log等。我们创建自己的Log类。
 
-* 新建Log.h Log.cpp, 封装了spdlog 并用定义了log宏
+接口的具体实现包含在了Usagi编译成的DLL中，当sandbox运行时，会加载这个dll来使用Usagi实现的功能，这种机制允许sandbox在编译时只知道接口，在运行时通过链接到dll来使用实际的功能实现。
 
-#### 4/11/2024 premake
-* 新建premake5.lua,复制dll修改成
-```lua
-postbuildcommands{
-            "copy /B /Y ..\\bin\\" .. outputdir .. "\\Usagi\\Usagi.dll ..\\bin\\" .. outputdir .. "\\Sandbox\\ > nul"
-        }
-```
-* 新建GenerateProject.bat
-
-#### 04/14/2024 event system plan 和 cmake
-* 新建cmake，可以在linux上vscode build项目。
-* 新建Events文件夹... TODO
+## 事件
+Usagi的每一个事件都是单独的类，记录了该事件自身的相关信息。

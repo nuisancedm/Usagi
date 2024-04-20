@@ -10,4 +10,12 @@
 	#error Usagi only support Windows!
 #endif
 
+#ifdef USG_ENABLE_ASSERTS
+	#define USG_ASSERT(x, ...){ if(!(x)) { USG_ERROR("Assertion Failed:{0}", __VA_ARGS__); __debugbreak(); } }
+	#define USG_CORE_ASSERT(x, ...){ if(!(x)) { USG_CORE_ERROR("Assertion Failed:{0}", __VA_ARGS__); __debugbreak(); } }
+#else
+	#define USG_ASSERT(x, ...)
+	#define USG_CORE_ASSERT(x, ...)
+#endif
+
 #define BIT(x) (1 << x)

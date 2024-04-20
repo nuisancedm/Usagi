@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Usagi/Core.h"
-
-#include <string>
-#include <functional>
+#include "usgpch.h"
 
 namespace Usagi {
-	// events is Usagi are currintlt blocking , meaning when an event occurs it
+	// events is Usagi are currently blocking , meaning when an event occurs it
 	// immediatelt gets dispatched and must be dealt with right then an there.
 	// for the future, a better strategy might be to buffer events in an event
 	// bus and process them during the "event" part of thr update stage.
@@ -56,19 +54,23 @@ namespace Usagi {
 	};
 
 	class EventDispatcher {
+		// 模板别名 EventFn 它接受一个具体事件类T的引用位参数，返回一个bool。
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
+		// 构造函数
 		EventDispatcher(Event& event)
 			:m_Event(event) {}
 
+		// dispatch接受一个函数指针位为参数，来处理m_Event。
 		template<typename T>
 		bool Dispatch(EventFn<T> func) {
 			if (m_Event.GetEventType() == T::GetStaticType()) {
+				// 调用函数处理事件
 				m_Event.m_Handled = func(*(T*)&m_Event);
 				return true;
 			}
-			return false;
+			return false;   
 		}
 	private:
 		Event& m_Event;

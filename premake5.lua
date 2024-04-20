@@ -9,6 +9,12 @@ workspace "Usagi"
 
 outputdir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
 
+-- Include directories relative to root folder (solution directories)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Usagi/vendor/GLFW/include"
+
+include "Usagi/vendor/GLFW"
+
 project "Usagi"
     location "Usagi"
     kind "SharedLib"
@@ -17,6 +23,9 @@ project "Usagi"
     targetdir("bin/" .. outputdir .. "/%{prj.name}")
     objdir("bin_int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "usgpch.h"
+    pchsource "Usagi/src/usgpch.cpp"
+
     files{
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp"
@@ -24,7 +33,13 @@ project "Usagi"
 
     includedirs{
         "%{prj.name}/src",
-        "%{prj.name}/vendor/spdlog/include"
+        "%{prj.name}/vendor/spdlog/include", 
+        "%{IncludeDir.GLFW}"
+    }
+
+    links{
+        "GLFW", 
+        "opengl32.lib"
     }
 
     filter "system:windows"
@@ -50,6 +65,7 @@ project "Usagi"
     filter "configurations:Dist"
         defines "USG_DIST"
         optimize "On"
+    
 
 project "Sandbox"
     location "Sandbox"
