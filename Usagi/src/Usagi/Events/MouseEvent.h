@@ -14,7 +14,7 @@ namespace Usagi {
 		// for debug use
 		std::string ToString() const override {
 			std::stringstream ss;
-			ss << "KeyReleasedEvent: (" << m_MouseX << ", " << m_MouseY << ")";
+			ss << "MouseMoveEvent: (" << m_MouseX << ", " << m_MouseY << ")";
 			return ss.str();
 		}
 		EVENT_CLASS_TYPE(MouseMoved)
