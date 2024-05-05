@@ -5,7 +5,8 @@
 
 namespace Usagi {
 	// WindowsWindow类继承自Window类，重写了Window类定义的虚函数，并进行了拓展，适用与Windows系统
-	class WindowsWindow : public Window {
+	class WindowsWindow : public Window 
+	{
 	public:
 
 		//构造和解构函数
@@ -17,6 +18,7 @@ namespace Usagi {
 		inline unsigned int GetWidth() const override { return m_Data.Width; }
 		inline unsigned int GetHeight() const override { return m_Data.Height; }
 		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		virtual void* GetNativeWindow() const { return m_Window; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
@@ -29,7 +31,8 @@ namespace Usagi {
 		// 使用GLFW窗口
 		GLFWwindow* m_Window;
 		// 内嵌WindowData结构体，存储了窗口相关的信息
-		struct WindowData {
+		struct WindowData 
+		{
 			std::string Title;
 			unsigned int Width;
 			unsigned int Height;

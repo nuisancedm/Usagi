@@ -38,6 +38,8 @@ namespace Usagi {
 		// 返回垂直同步的启用状态。
 		virtual bool IsVSync() const = 0;
 
+		virtual void* GetNativeWindow() const = 0;
+
 		// 静态 创建窗口函数
 		static Window* Create(const WindowProps& props = WindowProps());
 	};

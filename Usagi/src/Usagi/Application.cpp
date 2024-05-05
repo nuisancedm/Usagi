@@ -3,18 +3,20 @@
 
 #include "Usagi/Log.h"
 
-#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+#include "Input.h"
 namespace Usagi {
-	// 非静态成员函数的调用需要实例来调用，即实例名.函数名()的形式调用
-	// 但是当非静态成员函数需要传入某个函数成为回调函数时，它没法使用实例名.函数名()的形式调用。
-	// 需要用std::bind()来为这个函数指定上下文(即这个函数和那个实例绑定)，std::bind会返回一个基于这个函数新的可调用对象 std::function
-#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+// bind the non_static class menber function with the instance, used for make a function as a callback
+	Application* Application::s_Instance = nullptr;
 
 	Application::Application() {
-		// 创建一个Window
+		USG_CORE_ASSERT(s_Instance, "Application already exists!")
+		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
-		// 为Window设置事件回调函数，是一个函数指针，当满足一定条件时，调用这个函数
-		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(USG_BIND_EVENT_FN(Application::OnEvent));
+
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application() {
@@ -23,15 +25,17 @@ namespace Usagi {
 
 	void Application::PushLayer(Layer* layer) {
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay) {
 		m_LayerStack.PushOverlay(overlay);
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e) {
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowCloseEvent>(USG_BIND_EVENT_FN(Application::OnWindowClose));
 		// USG_CORE_TRACE("{0}",e);
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); ) {
@@ -45,7 +49,24 @@ namespace Usagi {
 		while (m_Running) {
 			glClearColor(0,0,0,1);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			for (Layer* layer : m_LayerStack)
+				layer->OnUpdate();
+
+			m_ImGuiLayer->Begin();
+			{
+
+				for (Layer* layer : m_LayerStack)
+					layer->OnImGuiRender();
+			}
+			m_ImGuiLayer->End();
+
+			auto [x, y] = Input::GetMousePosition();
+			USG_CORE_TRACE("{0}, {1}", x, y);
+
 			m_Window->OnUpdate();
+
+
 		};
 	}
 

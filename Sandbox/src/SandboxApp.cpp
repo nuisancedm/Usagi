@@ -6,7 +6,7 @@ public:
 		:Layer("Example") {}
 
 	void OnUpdate() override {
-		USG_INFO("ExampleLayer::Update");
+		// USG_INFO("ExampleLayer::Update");
 	}
 
 	void OnEvent(Usagi::Event& event) override {

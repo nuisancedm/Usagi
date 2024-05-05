@@ -25,9 +25,9 @@ namespace Usagi {
 		float m_MouseY;
 	};
 
-	class USAGI_API MouseScrollEvent : public Event {
+	class USAGI_API MouseScrolledEvent : public Event {
 	public:
-		MouseScrollEvent(float xOffset, float yOffset)
+		MouseScrolledEvent(float xOffset, float yOffset)
 			:m_XOffset(xOffset), m_YOffset(yOffset) {}
 		inline float GetXOffset() { return m_XOffset; }
 		inline float GetYOffset() { return m_YOffset; }

@@ -4,6 +4,7 @@
 #include "Usagi/Events/ApplicationEvent.h"
 #include "Usagi/Events/KeyEvent.h"
 #include "Usagi/Events/MouseEvent.h"
+#include <glad/glad.h>
 
 
 namespace Usagi {
@@ -52,9 +53,9 @@ namespace Usagi {
 		// 创建glfw窗口
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
-		// 给窗口设置一个用户指针，这个指针指向一片数据，将这片数据关联到这个窗口
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		USG_CORE_ASSERT(status, "Failed to initialize Glad!")
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		// 开启垂直同步
 		SetVSync(true);
 
 		// 设置GLFWWindowresize回调，在这里调用我们写的回调函数，直接用lamda写
@@ -120,7 +121,7 @@ namespace Usagi {
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-			MouseScrollEvent event((float)xOffset, (float)yOffset);
+			MouseScrolledEvent event((float)xOffset, (float)yOffset);
 			data.EventCallback(event);
 		});
 
