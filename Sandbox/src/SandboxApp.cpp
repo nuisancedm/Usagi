@@ -1,15 +1,27 @@
 #include <Usagi.h>
+#include "imgui/imgui.h"
+
 
 class ExampleLayer : public Usagi::Layer {
 public:
 	ExampleLayer()
-		:Layer("Example") {}
+		:Layer("Example") 
+	{	
+		
+	}
 
 	void OnUpdate() override {
 		// USG_INFO("ExampleLayer::Update");
 		if (Usagi::Input::IsKeyPressed(USG_KEY_TAB)) {
 			USG_TRACE("Tab Key is pressed (polling)");
 		}
+	}
+
+	virtual void OnImGuiRender() override
+	{
+		/*ImGui::Begin("Test");
+		ImGui::Text("Hello World");
+		ImGui::End();*/
 	}
 
 	void OnEvent(Usagi::Event& event) override {

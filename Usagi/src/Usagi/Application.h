@@ -13,6 +13,7 @@ namespace Usagi {
 	class USAGI_API Application
 	{
 	public:
+
 		Application();
 		virtual ~Application();
 
@@ -22,18 +23,25 @@ namespace Usagi {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		// call Application::Get() to get the reference of the Application first.
 		static inline Application& Get() { return *s_Instance; }
+		// then call Application.GetWindow() to get the reference of the Window.
 		inline Window& GetWindow() { return  *m_Window; }
+
 	private:
+
 		bool OnWindowClose(WindowCloseEvent& e);
+
 		std::unique_ptr<Window> m_Window;
-		bool m_Running = true;
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+		// static Application pointer, means only one application should exists.
 		static Application* s_Instance;
+
+		bool m_Running = true;
 	};
 
-	// To be defined in CLIENT
+	// To be defined in CLIENT, and should be called by CLIENT
 	Application* CreateApplication();
 }
 

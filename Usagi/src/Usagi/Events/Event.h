@@ -4,12 +4,10 @@
 #include "usgpch.h"
 
 namespace Usagi {
-	// events is Usagi are currently blocking , meaning when an event occurs it
-	// immediatelt gets dispatched and must be dealt with right then an there.
-	// for the future, a better strategy might be to buffer events in an event
-	// bus and process them during the "event" part of thr update stage.
 
-	enum class EventType {
+
+	enum class EventType 
+	{
 		None = 0,
 		// Window event
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
@@ -22,7 +20,8 @@ namespace Usagi {
 	};
 
 	// EventCategory is used to filter certain event
-	enum EventCategory {
+	enum EventCategory 
+	{
 		None = 0,
 		EventCategoryApplication = BIT(0), // 00001
 		EventCategoryInput       = BIT(1), // 00010
@@ -37,35 +36,41 @@ namespace Usagi {
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
-	class USAGI_API Event {
+	class USAGI_API Event 
+	{
 		friend class EventDispatcher;
 	public:
 		// if the event has been handled, we don't propgate the event any further
 		bool Handled = false;
 		virtual EventType GetEventType() const = 0;
+		// get the string of the type
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
+		// check if the event is in the given category
 		inline bool IsInCategory(EventCategory category) {
 			return GetCategoryFlags() & category;
 		}
 	};
 
-	class EventDispatcher {
-		// 模板别名 EventFn 它接受一个具体事件类T的引用位参数，返回一个bool。
+	class EventDispatcher 
+	{
+		// Template Aliases EventFn represents a function type that takes a reference to an object of type T and returns a boolean value.
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		// 构造函数
+
+		// initializes the EventDispatcher with a reference to an Event object.
 		EventDispatcher(Event& event)
 			:m_Event(event) {}
 
-		// dispatch接受一个函数指针位为参数，来处理m_Event。
+		// Member function Dispatch()
 		template<typename T>
 		bool Dispatch(EventFn<T> func) {
+			// Check if the m_Event type match the callback function type. it means that the event can be handled by the provided event handling function.
 			if (m_Event.GetEventType() == T::GetStaticType()) {
-				// 调用函数处理事件
+				// pass the event to the callback function
 				m_Event.Handled = func(*(T*)&m_Event);
 				return true;
 			}
@@ -75,7 +80,8 @@ namespace Usagi {
 		Event& m_Event;
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const Event& e) {
+	inline std::ostream& operator<< (std::ostream& os, const Event& e) 
+	{
 		return os << e.ToString();
 	}
 }

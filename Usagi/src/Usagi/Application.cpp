@@ -5,13 +5,19 @@
 
 #include <glad/glad.h>
 #include "Input.h"
-namespace Usagi {
-// bind the non_static class menber function with the instance, used for make a function as a callback
+namespace Usagi 
+{
+	// outside definition of a static class member s_Instance
 	Application* Application::s_Instance = nullptr;
 
+	// constructor
 	Application::Application() {
+		// if s_Instance is not nullptr, means applicaiton already exists.
 		USG_CORE_ASSERT(s_Instance, "Application already exists!")
+		// point s_Instance to the instance.
 		s_Instance = this;
+
+		// initialize m_Window, and set the callback function for the window.
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(USG_BIND_EVENT_FN(Application::OnEvent));
 
