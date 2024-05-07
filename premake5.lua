@@ -23,8 +23,11 @@ include "Usagi/vendor/imgui"
 
 project "Usagi"
     location "Usagi"
-    kind "SharedLib"
+    kind "StaticLib"
     language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
+
 
     targetdir("bin/" .. outputdir .. "/%{prj.name}")
     objdir("bin_int/" .. outputdir .. "/%{prj.name}")
@@ -49,6 +52,10 @@ project "Usagi"
         
     }
 
+    defines {
+        "_CRT_SECURE_NO_WARNINGS"
+    }
+
     links{
         "GLFW", 
         "Glad",
@@ -57,7 +64,6 @@ project "Usagi"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
         staticruntime "On"
         systemversion "latest"
 
@@ -66,29 +72,27 @@ project "Usagi"
             "USAGI_BUILD_DLL",
             "GLFW_INCLUDE_NONE"
         }
-
-        postbuildcommands{
-            "copy /B /Y ..\\bin\\" .. outputdir .. "\\Usagi\\Usagi.dll ..\\bin\\" .. outputdir .. "\\Sandbox\\ > nul"
-        }
     
     filter "configurations:Debug"
         defines "USG_DEBUG"
-        buildoptions "/MDd"
-        symbols "On"
+        runtime "Debug"
+        symbols "on"
     filter "configurations:Release"
         defines "USG_RELEASE"
-        buildoptions "/MD"
-        optimize "On"
+        runtime "Release"
+        optimize "on"
     filter "configurations:Dist"
         defines "USG_DIST"
-        buildoptions "/MD"
-        optimize "On"
+        runtime "Release"
+        optimize "on"
     
 
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
 
     targetdir("bin/" .. outputdir .. "/%{prj.name}")
     objdir("bin_int/" .. outputdir .. "/%{prj.name}")
@@ -110,8 +114,6 @@ project "Sandbox"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
-        staticruntime "On"
         systemversion "latest"
 
         defines{
@@ -120,13 +122,13 @@ project "Sandbox"
     
     filter "configurations:Debug"
         defines "USG_DEBUG"
-        buildoptions "/MDd"
-        symbols "On"
+        runtime "Debug"
+        symbols "on"
     filter "configurations:Release"
         defines "USG_RELEASE"
-        buildoptions "/MD"
-        optimize "On"
+        runtime "Release"
+        optimize "on"
     filter "configurations:Dist"
         defines "USG_DIST"
-        buildoptions "/MD"
-        optimize "On"
+        runtime "Release"
+        optimize "on"

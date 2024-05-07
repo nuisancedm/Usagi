@@ -1,11 +1,15 @@
 #pragma once
 
 #ifdef USAGI_PLATFORM_WINDOWS
+#if USG_DYNAMIC_LINK
 	#ifdef USAGI_BUILD_DLL
 		#define USAGI_API __declspec(dllexport)
 	#else
 		#define USAGI_API __declspec(dllimport)
 	#endif
+
+#endif
+#define USAGI_API
 #else
 	#error Usagi only support Windows!
 #endif
