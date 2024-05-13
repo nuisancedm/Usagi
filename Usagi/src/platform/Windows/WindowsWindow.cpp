@@ -4,7 +4,9 @@
 #include "Usagi/Events/ApplicationEvent.h"
 #include "Usagi/Events/KeyEvent.h"
 #include "Usagi/Events/MouseEvent.h"
-#include <glad/glad.h>
+
+#include "platform/OpenGL/OpenGLContext.h"
+
 
 
 namespace Usagi {
@@ -14,24 +16,23 @@ namespace Usagi {
 		USG_CORE_ERROR("GLFW Error ({0}):{1}", error, description);
 	};
 
-	// Window* Window::Create实现，返回一个WindowsWindow类实例的地址
+	// Window* Window::Create : WindowsWindow implementation 
 	Window* Window::Create(const WindowProps& props) {
 		return new WindowsWindow(props);
 	}
 
-	// WindowsWindow 构造函数，调用WindowsWindow的私有方法Init
+	// constructor
 	WindowsWindow::WindowsWindow(const WindowProps& props) {
 		Init(props);
 	}
 
-	// WindowsWindow 解构函数，调用WindowsWindow的私有方法ShutDown
+	// destructor 
 	WindowsWindow::~WindowsWindow() {
 		ShutDown();
 	}
 
-	// WindowsWindow私有方法Init的具体实现
 	void WindowsWindow::Init(const WindowProps& props) {
-		// m_Data初始化
+		// use WIndowProps to init m_Data
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
@@ -39,26 +40,27 @@ namespace Usagi {
 		// core info
 		USG_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
-
 		if (!s_GLFWInitialized) {
-			// 调用glfwInit()，返回一个状态码，代表glfw初始化是否成功
+			// glfwInit return an int status. check it.
 			int success = glfwInit();
-			// 此行生效的前提是开启了ASSERT
 			USG_CORE_ASSERT(success, "Could not initialize GLFW!");
 
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
 
-		// 创建glfw窗口
+		// create glfw Window
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		USG_CORE_ASSERT(status, "Failed to initialize Glad!")
+		
+		// create Opengl Context
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
+
+		// set glfwWindows's user data pointer
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
-		// 设置GLFWWindowresize回调，在这里调用我们写的回调函数，直接用lamda写
+		// callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
 			// 解引用绑定在当前窗口的用户指针
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -69,14 +71,12 @@ namespace Usagi {
 			data.EventCallback(event);
 		});
 
-		// 窗口关闭事件
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			WindowCloseEvent event;
 			data.EventCallback(event);
 		});
 
-		// 键盘按键事件
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -99,7 +99,6 @@ namespace Usagi {
 			}
 		});
 
-		// 鼠标按键事件
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int modes) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -117,7 +116,6 @@ namespace Usagi {
 			}
 		});
 
-		// 鼠标滚轮事件
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -125,7 +123,6 @@ namespace Usagi {
 			data.EventCallback(event);
 		});
 
-		// 鼠标移动事件
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -141,7 +138,7 @@ namespace Usagi {
 
 	void WindowsWindow::OnUpdate() {
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Usagi/Window.h"
+#include "Usagi/Renderer/GraphicContext.h"
 #include <GLFW/glfw3.h>
 
 namespace Usagi {
@@ -28,7 +29,8 @@ namespace Usagi {
 
 		// windows window using glfw window
 		GLFWwindow* m_Window;
-		
+		GraphicContext* m_Context;
+
 		struct WindowData 
 		{
 			std::string Title;

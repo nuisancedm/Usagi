@@ -8,6 +8,8 @@
 #include "Usagi/Events/ApplicationEvent.h"
 #include "Usagi/ImGui/ImGuiLayer.h"
 
+#include "Usagi/Renderer/Shader.h"
+#include "Usagi/Renderer/Buffer.h"
 namespace Usagi {
 
 	class USAGI_API Application
@@ -39,6 +41,11 @@ namespace Usagi {
 		static Application* s_Instance;
 
 		bool m_Running = true;
+
+		unsigned int m_VertexArray;
+		std::unique_ptr<Shader> m_Shader;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_IndexBuffer;
 	};
 
 	// To be defined in CLIENT, and should be called by CLIENT
