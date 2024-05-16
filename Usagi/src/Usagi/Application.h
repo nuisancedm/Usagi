@@ -10,6 +10,7 @@
 
 #include "Usagi/Renderer/Shader.h"
 #include "Usagi/Renderer/Buffer.h"
+#include "Usagi/Renderer/VertexArray.h"
 namespace Usagi {
 
 	class USAGI_API Application
@@ -42,10 +43,11 @@ namespace Usagi {
 
 		bool m_Running = true;
 
-		unsigned int m_VertexArray;
-		std::unique_ptr<Shader> m_Shader;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		std::shared_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexArray> m_VertexArray;
+
+		std::shared_ptr<Shader> m_PureBlueShader;
+		std::shared_ptr<VertexArray> m_SquareVA;
 	};
 
 	// To be defined in CLIENT, and should be called by CLIENT

@@ -19,7 +19,7 @@ namespace Usagi {
 		return nullptr;
 	}
 
-	IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t size) 
+	IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t count) 
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -27,7 +27,7 @@ namespace Usagi {
 			USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet.");
 			return nullptr;
 		case RendererAPI::OPENGL:
-			return new OpenGLIndexBuffer(indices, size);
+			return new OpenGLIndexBuffer(indices, count);
 		}
 
 		USG_CORE_ASSERT(false, "Unknown Renderer API");
