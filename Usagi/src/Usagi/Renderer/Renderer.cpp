@@ -11,6 +11,4 @@ namespace Usagi {
 		vertexArray->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
 	}
-
-
 }
