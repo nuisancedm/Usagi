@@ -9,10 +9,10 @@ namespace Usagi {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::NONE: 
+		case RendererAPI::API::NONE: 
 			USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet.");
 			return nullptr;
-		case RendererAPI::OPENGL: return new OpenGLVertexBuffer(vertices, size);
+		case RendererAPI::API::OPENGL: return new OpenGLVertexBuffer(vertices, size);
 		}
 
 		USG_CORE_ASSERT(false, "Unknown Renderer API");
@@ -23,10 +23,10 @@ namespace Usagi {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::NONE:
+		case RendererAPI::API::NONE:
 			USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet.");
 			return nullptr;
-		case RendererAPI::OPENGL:
+		case RendererAPI::API::OPENGL:
 			return new OpenGLIndexBuffer(indices, count);
 		}
 

@@ -4,7 +4,10 @@
 #include "Usagi/Log.h"
 
 #include <glad/glad.h>
+#include "Usagi/Renderer/Renderer.h"
 #include "Input.h"
+
+
 namespace Usagi 
 {
 	// outside definition of a static class member s_Instance
@@ -151,16 +154,19 @@ namespace Usagi
 
 	void Application::Run() {
 		while (m_Running) {
-			glClearColor(0.15,0.15,0.15,1);
-			glClear(GL_COLOR_BUFFER_BIT);
 
-			m_PureBlueShader->Bind();
-			m_SquareVA->Bind();
-			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			RenderCommand::SetClearColor({ 0.15, 0.15, 0.15, 1 });
+			RenderCommand::Clear();
 
-			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::BeginScene();
+			{
+				m_PureBlueShader->Bind();
+				Renderer::Submit(m_SquareVA);
+
+				m_Shader->Bind();
+				Renderer::Submit(m_VertexArray);
+			}
+			Renderer::EndScene();
 
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
