@@ -1,3 +1,9 @@
+//================== INTRO OF THIS FILE ===========================
+// Window.h provide a general Window interface
+// Application will call Window::create() to create a Window.
+// Window::create() will be implemented by different platform, for now. just WindowsWindow.
+//=================================================================
+
 #pragma once
 
 #include "usgpch.h"
@@ -29,7 +35,6 @@ namespace Usagi {
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
 
-		// 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 
 		virtual void SetVSync(bool enabled) = 0;
@@ -37,6 +42,6 @@ namespace Usagi {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static Window* Create(const WindowProps& props = WindowProps());
+		static Window* Create(const WindowProps& props = WindowProps());               //@@ static function, only one implementation is allowed.
 	};
 }

@@ -7,59 +7,62 @@
 #include "Usagi/Renderer/Renderer.h"
 #include "Input.h"
 
-
 namespace Usagi 
 {
-	// outside definition of a static class member s_Instance
-	Application* Application::s_Instance = nullptr;
+	
+	Application* Application::s_Instance = nullptr;                          //@@ outside definition of a static class member s_Instance
 
+	Application::Application() 
+		:m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+	{
+		
+		USG_CORE_ASSERT(s_Instance, "Application already exists!")           //@@ if s_Instance is not nullptr, means applicaiton already exists.
+		s_Instance = this;                                                   //@@ point s_Instance to the instance.
 
-	// constructor
-	Application::Application() {
-		// if s_Instance is not nullptr, means applicaiton already exists.
-		USG_CORE_ASSERT(s_Instance, "Application already exists!")
-		// point s_Instance to the instance.
-		s_Instance = this;
+		
+		m_Window = std::unique_ptr<Window>(Window::Create());                //@@ initialize m_Window, and set the callback function for the window.      
+		m_Window->SetEventCallback(USG_BIND_EVENT_FN(Application::OnEvent)); //@@ pass the OnEvent function to Window
 
-		// initialize m_Window, and set the callback function for the window.
-		m_Window = std::unique_ptr<Window>(Window::Create());
-		m_Window->SetEventCallback(USG_BIND_EVENT_FN(Application::OnEvent));
-
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new ImGuiLayer();                                     //@@ create imgui layer, which is an overlay
 		PushOverlay(m_ImGuiLayer);
 
 		
-		m_VertexArray.reset(VertexArray::create());
-
-		float vertices[3 * 7] = {
+		float vertices[3 * 7] = {                                            //@@ vertices data
 			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f
 		};
+		unsigned int indices[3] = { 0,1,2 };                                 //@@ indice data  
 
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-		BufferLayout layout = 
+		
+		m_VertexArray.reset(VertexArray::create());                          //@@ reset VA smart pointer, VA is a member of Application.
+
+		std::shared_ptr<VertexBuffer> vertexBuffer;                          //@@ init VB's smart pointer, VB is not a member of Application
+		vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));//@@ reset VB smart pointer
+		BufferLayout layout =                                                //@@ define the layout of the VB
 		{
 			{ShaderDataType::Float3, "a_Position"},
 			{ShaderDataType::Float4, "a_Color"}
 		};
-		vertexBuffer->SetLayout(layout);
-		m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-		unsigned int indices[3] = { 0,1,2 };
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices, 3));
-		m_VertexArray->SetIndexBuffer(indexBuffer);
+		vertexBuffer->SetLayout(layout);                                     //@@ set the layout for VB
+		m_VertexArray->AddVertexBuffer(vertexBuffer);                        //@@ feed the VB to VA
 
 
-		m_SquareVA.reset(VertexArray::create());
+		std::shared_ptr<IndexBuffer> indexBuffer;                            //@@ init IB's smart pointer, IB is not a member of Application
+		indexBuffer.reset(IndexBuffer::Create(indices, 3));                  //@@ reset IB smart pointer
+		m_VertexArray->SetIndexBuffer(indexBuffer);                          //@@ feed the IB to VA
+
+
 		float squareVertices[3 * 4] = {
 			-0.75f, -0.75f, 0.0f,
 			 0.75f, -0.75f, 0.0f,
-			 0.75f,  0.75f, 0.0f,		
+			 0.75f,  0.75f, 0.0f,
 			-0.75f,  0.75f, 0.0f
 		};
+		unsigned int squareIndices[6] = { 0,1,2,2,3,0 };
+
+		m_SquareVA.reset(VertexArray::create());
+		
 		std::shared_ptr<VertexBuffer> squareVB;
 		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		BufferLayout squareLayout = {
@@ -68,7 +71,6 @@ namespace Usagi
 		squareVB->SetLayout(squareLayout);
 		m_SquareVA->AddVertexBuffer(squareVB);
 
-		unsigned int squareIndices[6] = { 0,1,2,2,3,0 };
 		std::shared_ptr<IndexBuffer> squareIB;
 		squareIB.reset(IndexBuffer::Create(squareIndices, 6));
 		m_SquareVA->SetIndexBuffer(squareIB);
@@ -80,15 +82,17 @@ namespace Usagi
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_Position;		
 			out vec4 v_Color;		
 	
 	
 			void main()
 			{
-				gl_Position = vec4(a_Position, 1.0);
 				v_Position = a_Position;
 				v_Color = a_Color;
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 		std::string fragmentSource = R"(
@@ -102,17 +106,22 @@ namespace Usagi
 				color = v_Color;
 			}
 		)";
+
 		m_Shader.reset(new Shader(vertexSource, fragmentSource));
 
 		std::string pureBlueVertexSource = R"(
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;		
-	
+			
+			uniform mat4 u_ViewProjection;
+			
+			
 			void main()
 			{
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
+
 		std::string pureBlueFragmentSource = R"(
 			#version 330 core
 			layout(location = 0) out vec4 color;
@@ -158,14 +167,14 @@ namespace Usagi
 			RenderCommand::SetClearColor({ 0.15, 0.15, 0.15, 1 });
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
-			{
-				m_PureBlueShader->Bind();
-				Renderer::Submit(m_SquareVA);
+			m_Camera.SetPosition({ 0.5f,0.5f,0.0f });
+			m_Camera.SetRotation(45.0f);
 
-				m_Shader->Bind();
-				Renderer::Submit(m_VertexArray);
-			}
+			Renderer::BeginScene(m_Camera);
+			
+			Renderer::Submit(m_PureBlueShader, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
+			
 			Renderer::EndScene();
 
 			for (Layer* layer : m_LayerStack)
@@ -180,8 +189,6 @@ namespace Usagi
 			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();
-
-
 		};
 	}
 

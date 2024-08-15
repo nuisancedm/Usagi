@@ -25,3 +25,7 @@
 #define BIT(x) (1 << x)
 
 #define USG_BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+//============== C++ NOTES HERE =================
+//@@ std::bind will make a new callable function as a callback function.
+//@@ in CPP, member function is different with normal function, it need a signiture call the function.
+//@@ std::bind will make a member funciton to be a new callable more like a normal function.

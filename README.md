@@ -7,7 +7,7 @@
 we have **USAGI** as an engine we build.  
 we have **SANDBOX** as a client who gose to use USAGI to create something.  
 
-**USAGI** provides *usagi.h*, which is a headfile includes all definitions of classes or functions the client (**SANDBOX**) shoule be #included by the client. in the other way of saying, *usagi.h* is the USAGI interface for client to use.
+**USAGI** provides *usagi.h*, which is a headfile includes all definitions of classes or functions the client (**SANDBOX**) shoule be #included. in the other way of saying, *usagi.h* is the USAGI interface for client to use.
 
 however *usagi.h* are just definitions, it doesn't have implementation.  
 **USAGI** will be dynamic linked to the the client, client could get the implementation from the dll file.

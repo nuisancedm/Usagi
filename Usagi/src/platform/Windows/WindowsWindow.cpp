@@ -16,7 +16,7 @@ namespace Usagi {
 		USG_CORE_ERROR("GLFW Error ({0}):{1}", error, description);
 	};
 
-	// Window* Window::Create : WindowsWindow implementation 
+	// static funciton "Window* Window::Create"  WindowsWindow implementation 
 	Window* Window::Create(const WindowProps& props) {
 		return new WindowsWindow(props);
 	}
@@ -32,16 +32,14 @@ namespace Usagi {
 	}
 
 	void WindowsWindow::Init(const WindowProps& props) {
-		// use WIndowProps to init m_Data
-		m_Data.Title = props.Title;
+		
+		m_Data.Title = props.Title;										//@@ use WIndowProps to init m_Data
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
-		// core info
 		USG_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
-
-		if (!s_GLFWInitialized) {
-			// glfwInit return an int status. check it.
+			
+		if (!s_GLFWInitialized) {										//@@ check if glfw is inited.									
 			int success = glfwInit();
 			USG_CORE_ASSERT(success, "Could not initialize GLFW!");
 
@@ -49,21 +47,22 @@ namespace Usagi {
 			s_GLFWInitialized = true;
 		}
 
-		// create glfw Window
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);   //@@ create glfw Window
 		
-		// create Opengl Context
-		m_Context = new OpenGLContext(m_Window);
+		m_Context = new OpenGLContext(m_Window);                        //@@ create Opengl Context
 		m_Context->Init();
 
-		// set glfwWindows's user data pointer
-		glfwSetWindowUserPointer(m_Window, &m_Data);
+		
+		// ========= OPENGL NOTES ==========
+		// m_Data is a member of the WindowsWindow, in normal case glfwWindow can't access this data.
+		// glfwSetWindowUserPointer() bind a pointer to ht glfwWindow, so it can be access by glfwwindow in the callback function.
+		// ================================
+		glfwSetWindowUserPointer(m_Window, &m_Data);                    //@@ set glfwWindows's user data pointer
 		SetVSync(true);
 
-		// callbacks
-		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
-			// 解引用绑定在当前窗口的用户指针
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) { //@@ set callbacks, use lamda here.
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);              //@@ use glfwGetWindowUserPointer to get the data bind to the glfwWindow.
 			data.Width = width;
 			data.Height = height;
 
