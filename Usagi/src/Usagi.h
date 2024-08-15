@@ -30,6 +30,7 @@
 #pragma once
 
 //@@ For use by Usagi applications
+// --- Renderer ---------------------
 #include "Usagi/Application.h"       
 #include "Usagi/Layer.h"
 #include "Usagi/Log.h"
@@ -39,6 +40,17 @@
 #include "Usagi/Input.h"
 
 #include "Usagi/ImGui/ImGuiLayer.h"
+
+#include "Usagi/Renderer/Renderer.h"
+#include "Usagi/Renderer/RenderCommand.h"
+
+#include "Usagi/Renderer/Buffer.h"
+#include "Usagi/Renderer/Shader.h"
+#include "Usagi/Renderer/VertexArray.h"
+
+#include "Usagi/Renderer/OrthographicCamera.h"
+// -----------------------------------
+
 
 // ---Entry Point---------------------
 #include "Usagi/EntryPoint.h"

@@ -54,13 +54,6 @@ namespace Usagi {
 
 		bool m_Running = true;                                  //@@ flag for running loop
 
-		std::shared_ptr<Shader> m_Shader;					    //@@ shader and VAs
-		std::shared_ptr<VertexArray> m_VertexArray;
-
-		std::shared_ptr<Shader> m_PureBlueShader;
-		std::shared_ptr<VertexArray> m_SquareVA;
-
-		OrthographicCamera m_Camera;
 
 	};
 
