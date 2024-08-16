@@ -35,6 +35,8 @@
 #include "Usagi/Layer.h"
 #include "Usagi/Log.h"
 
+#include "Usagi/Core/Timestep.h"
+
 #include "Usagi/Keycodes.h"
 #include "Usagi/MouseButtonCodes.h"
 #include "Usagi/Input.h"

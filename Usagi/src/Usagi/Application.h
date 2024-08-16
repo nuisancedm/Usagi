@@ -8,10 +8,8 @@
 #include "Usagi/Events/ApplicationEvent.h"
 #include "Usagi/ImGui/ImGuiLayer.h"
 
-#include "Usagi/Renderer/Shader.h"
-#include "Usagi/Renderer/Buffer.h"
-#include "Usagi/Renderer/VertexArray.h"
-#include "Usagi/Renderer/OrthographicCamera.h"
+#include "Usagi/Core/Timestep.h"
+
 
 namespace Usagi {
 
@@ -28,7 +26,6 @@ namespace Usagi {
 		void PushLayer(Layer* layer);                            //@@ Push a layer to the LayerStack
 		void PushOverlay(Layer* overlay);					     //@@ Push a Overlay to the LayerStack
 
-		
 		static inline Application& Get() { return *s_Instance; } //@@ call Application::Get() to get the reference of the Application first.
 		inline Window& GetWindow() { return  *m_Window; }        //@@ then call Application.GetWindow() to get the reference of the Window.    
 
@@ -37,21 +34,20 @@ namespace Usagi {
 															     // the return type is a reference here to avoid duplicate of the huge class in memory.
 
 	private:
-
 		bool OnWindowClose(WindowCloseEvent& e);
 
+	private:
 		std::unique_ptr<Window> m_Window;                        //@@ Application create and hold the Window.
-
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+		float m_LastFrameTime = 0.0f;
 
+	private:
 		static Application* s_Instance;                         //@@ static Application pointer, means only one application should exists.
-
 													            //============== C++ NOTES HERE =================
 															    // static property need a redefine outside the class
 																// static property belongs not the instance of the class but the class it self.
 		                                                        // all the instances share only one copy of the static property member.
-
 		bool m_Running = true;                                  //@@ flag for running loop
 
 
