@@ -15,6 +15,7 @@ IncludeDir["GLFW"] = "Usagi/vendor/GLFW/include"
 IncludeDir["Glad"] = "Usagi/vendor/Glad/include"
 IncludeDir["ImGui"] = "Usagi/vendor/imgui"
 IncludeDir["glm"] = "Usagi/vendor/glm"
+IncludeDir["stb_image"] = "Usagi/vendor/stb_image"
 
 
 include "Usagi/vendor/GLFW"
@@ -38,6 +39,8 @@ project "Usagi"
     files{
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/stb_image/**.h",
+        "%{prj.name}/vendor/stb_image/**.cpp",
         "%{prj.name}/vendor/glm/glm/**.hpp",
         "%{prj.name}/vendor/glm/glm/**.inl",
     }
@@ -48,7 +51,9 @@ project "Usagi"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb_image}"
+
         
     }
 

@@ -1,6 +1,11 @@
 #include <Usagi.h>
+
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "platform/OpenGL/OpenGLShader.h"
+#include "glm/gtc/type_ptr.hpp"
+
 
 class ExampleLayer : public Usagi::Layer {
 public:
@@ -19,7 +24,7 @@ public:
 
 		m_VertexArray.reset(Usagi::VertexArray::create());                          //@@ reset VA smart pointer, VA is a member of Application.
 
-		std::shared_ptr<Usagi::VertexBuffer> vertexBuffer;                          //@@ init VB's smart pointer, VB is not a member of Application
+		Usagi::Ref<Usagi::VertexBuffer> vertexBuffer;                          //@@ init VB's smart pointer, VB is not a member of Application
 		vertexBuffer.reset(Usagi::VertexBuffer::Create(vertices, sizeof(vertices)));//@@ reset VB smart pointer
 		Usagi::BufferLayout layout =                                                //@@ define the layout of the VB
 		{
@@ -30,32 +35,36 @@ public:
 		m_VertexArray->AddVertexBuffer(vertexBuffer);                        //@@ feed the VB to VA
 
 
-		std::shared_ptr<Usagi::IndexBuffer> indexBuffer;                            //@@ init IB's smart pointer, IB is not a member of Application
+		Usagi::Ref<Usagi::IndexBuffer> indexBuffer;                            //@@ init IB's smart pointer, IB is not a member of Application
 		indexBuffer.reset(Usagi::IndexBuffer::Create(indices, 3));                  //@@ reset IB smart pointer
 		m_VertexArray->SetIndexBuffer(indexBuffer);                          //@@ feed the IB to VA
 
 
-		float squareVertices[3 * 4] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
+		float squareVertices[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 		};
+
 		unsigned int squareIndices[6] = { 0,1,2,2,3,0 };
 
 		m_SquareVA.reset(Usagi::VertexArray::create());
 
-		std::shared_ptr<Usagi::VertexBuffer> squareVB;
+		Usagi::Ref<Usagi::VertexBuffer> squareVB;
 		squareVB.reset(Usagi::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		Usagi::BufferLayout squareLayout = {
-			{Usagi::ShaderDataType::Float3, "a_Position"}
+			{Usagi::ShaderDataType::Float3, "a_Position"},
+			{Usagi::ShaderDataType::Float2, "a_TexCoord"}
 		};
 		squareVB->SetLayout(squareLayout);
 		m_SquareVA->AddVertexBuffer(squareVB);
 
-		std::shared_ptr<Usagi::IndexBuffer> squareIB;
+		Usagi::Ref<Usagi::IndexBuffer> squareIB;
 		squareIB.reset(Usagi::IndexBuffer::Create(squareIndices, 6));
 		m_SquareVA->SetIndexBuffer(squareIB);
+
+
 
 
 
@@ -90,33 +99,78 @@ public:
 			}
 		)";
 
-		m_Shader.reset(new Usagi::Shader(vertexSource, fragmentSource));
+		m_Shader.reset(Usagi::Shader::create(vertexSource, fragmentSource));
 
-		std::string pureBlueVertexSource = R"(
+		std::string flatColorVertexSource = R"(
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;		
 			
 			uniform mat4 u_ViewProjection;
 			uniform mat4 u_Transform;
+
+			out vec3 v_Position;
 			
 			
 			void main()
 			{
+				v_Position = a_Position;
+				gl_Position = u_ViewProjection * u_Transform * vec4(v_Position, 1.0);
+			}
+		)";
+
+		std::string flatColorFragmentSource = R"(
+			#version 330 core
+			layout(location = 0) out vec4 color;
+			
+			in vec3 v_Position;
+			uniform	vec3 u_Color;		
+
+			void main()
+			{
+				color = vec4(u_Color, 1.0);
+			}
+		)";
+
+		m_flatColorShader.reset(Usagi::Shader::create(flatColorVertexSource, flatColorFragmentSource));
+
+
+		std::string texutreShaderVertexSource = R"(
+			#version 330 core
+			layout(location = 0) in vec3 a_Position;		
+			layout(location = 1) in vec2 a_TexCoord;		
+			
+			out vec2 v_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;			
+			
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
 				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
 		)";
 
-		std::string pureBlueFragmentSource = R"(
+		std::string texutreShaderFragmentSource = R"(
 			#version 330 core
 			layout(location = 0) out vec4 color;
-	
+			
+			in vec2 v_TexCoord;	
+
+			uniform sampler2D u_Texture;
+
 			void main()
 			{
-				color = vec4(0.2f, 0.3f, 1.0f, 1.0f);
+				color = texture(u_Texture, v_TexCoord);
 			}
 		)";
 
-		m_PureBlueShader.reset(new Usagi::Shader(pureBlueVertexSource, pureBlueFragmentSource));
+		m_textureShader.reset(Usagi::Shader::create(texutreShaderVertexSource, texutreShaderFragmentSource));
+
+		m_Texture = Usagi::Texture2D::Create("assets/textures/usagi3.png");
+
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_textureShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Usagi::Timestep ts) override {
@@ -153,19 +207,23 @@ public:
 
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
 
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_flatColorShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_flatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+		
 
 		for (int y = 0; y < 10; y++) {
 			for (int i = 0; i < 10; i++) {
 				glm::vec3 pos(i * 0.11f, y*0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				Usagi::Renderer::Submit(m_PureBlueShader, m_SquareVA, transform);
+				Usagi::Renderer::Submit(m_flatColorShader, m_SquareVA, transform);
 			}
 		}
 
-		Usagi::Renderer::Submit(m_Shader, m_VertexArray);
+		m_Texture->Bind(0);
+		Usagi::Renderer::Submit(m_textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
-		
-
+		// Triangle
+		// Usagi::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Usagi::Renderer::EndScene();
 		
@@ -173,8 +231,9 @@ public:
 
 	virtual void OnImGuiRender() override
 	{
-		ImGui::Begin("Test");
+		ImGui::Begin("Settings");
 		ImGui::Text("Hello World");
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
 		ImGui::End();
 	}
 
@@ -211,11 +270,13 @@ public:
 	}*/
 
 private:
-	std::shared_ptr<Usagi::Shader> m_Shader;					    //@@ shader and VAs
-	std::shared_ptr<Usagi::VertexArray> m_VertexArray;
+	Usagi::Ref<Usagi::Shader> m_Shader;					    //@@ shader and VAs
+	Usagi::Ref<Usagi::VertexArray> m_VertexArray;
 
-	std::shared_ptr<Usagi::Shader> m_PureBlueShader;
-	std::shared_ptr<Usagi::VertexArray> m_SquareVA;
+	Usagi::Ref<Usagi::Shader> m_flatColorShader, m_textureShader;
+	Usagi::Ref<Usagi::VertexArray> m_SquareVA;
+
+	Usagi::Ref<Usagi::Texture2D> m_Texture;
 
 	Usagi::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0.0f,0.0f,0.0f };
@@ -223,6 +284,8 @@ private:
 	
 	float m_CameraMoveSpeed = 5.0f; // unit per second
 	float m_CameraRotationSpeed = 180.0f; // degree per second
+
+	glm::vec3 m_SquareColor = { 0.2f,0.3f,0.8f };
 
 
 };

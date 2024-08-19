@@ -49,6 +49,7 @@
 #include "Usagi/Renderer/Buffer.h"
 #include "Usagi/Renderer/Shader.h"
 #include "Usagi/Renderer/VertexArray.h"
+#include "Usagi/Renderer/Texture.h"
 
 #include "Usagi/Renderer/OrthographicCamera.h"
 // -----------------------------------

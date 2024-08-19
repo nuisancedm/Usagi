@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 #ifdef USAGI_PLATFORM_WINDOWS
 #if USG_DYNAMIC_LINK
@@ -29,3 +30,11 @@
 //@@ std::bind will make a new callable function as a callback function.
 //@@ in CPP, member function is different with normal function, it need a signiture call the function.
 //@@ std::bind will make a member funciton to be a new callable more like a normal function.
+
+namespace Usagi {
+	template <typename T>
+	using Scope = std::unique_ptr<T>;
+
+	template <typename T>
+	using Ref = std::shared_ptr<T>;
+}

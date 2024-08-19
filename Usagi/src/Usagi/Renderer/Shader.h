@@ -1,17 +1,13 @@
 #pragma once
 #include <string>
-#include <glm/glm.hpp>
 namespace Usagi {
 	class Shader {
 	public:
-		Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
-		~Shader();
+		virtual ~Shader() = default; //@@ automatic use default destructor
 
-		void Bind();
-		void Unbind();
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
 
-		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
-	private:
-		uint32_t m_RendererID;
+		static Shader* create(const std::string& vertexSrc, const std::string& fragmentSrc);
 	};
 }
