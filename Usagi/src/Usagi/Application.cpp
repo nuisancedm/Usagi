@@ -24,6 +24,8 @@ namespace Usagi
 		m_Window = std::unique_ptr<Window>(Window::Create());                //@@ initialize m_Window, and set the callback function for the window.      
 		m_Window->SetEventCallback(USG_BIND_EVENT_FN(Application::OnEvent)); //@@ pass the OnEvent function to Window
 
+		Renderer::Init();
+
 		m_ImGuiLayer = new ImGuiLayer();                                     //@@ create imgui layer, which is an overlay
 		PushOverlay(m_ImGuiLayer);
 

@@ -64,10 +64,6 @@ public:
 		squareIB.reset(Usagi::IndexBuffer::Create(squareIndices, 6));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-
-
-
-
 		std::string vertexSource = R"(
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;
@@ -99,7 +95,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(Usagi::Shader::create(vertexSource, fragmentSource));
+		m_Shader = Usagi::Shader::create("VertexPosColor", vertexSource, fragmentSource);
 
 		std::string flatColorVertexSource = R"(
 			#version 330 core
@@ -131,46 +127,15 @@ public:
 			}
 		)";
 
-		m_flatColorShader.reset(Usagi::Shader::create(flatColorVertexSource, flatColorFragmentSource));
+		m_flatColorShader = Usagi::Shader::create("FlatColor", flatColorVertexSource, flatColorFragmentSource);
 
-
-		std::string texutreShaderVertexSource = R"(
-			#version 330 core
-			layout(location = 0) in vec3 a_Position;		
-			layout(location = 1) in vec2 a_TexCoord;		
-			
-			out vec2 v_TexCoord;
-
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;			
-			
-			void main()
-			{
-				v_TexCoord = a_TexCoord;
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-			}
-		)";
-
-		std::string texutreShaderFragmentSource = R"(
-			#version 330 core
-			layout(location = 0) out vec4 color;
-			
-			in vec2 v_TexCoord;	
-
-			uniform sampler2D u_Texture;
-
-			void main()
-			{
-				color = texture(u_Texture, v_TexCoord);
-			}
-		)";
-
-		m_textureShader.reset(Usagi::Shader::create(texutreShaderVertexSource, texutreShaderFragmentSource));
+		auto TextureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 		m_Texture = Usagi::Texture2D::Create("assets/textures/usagi3.png");
+		m_Texture2 = Usagi::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_textureShader)->Bind();
-		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_textureShader)->UploadUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(TextureShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(TextureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Usagi::Timestep ts) override {
@@ -219,8 +184,12 @@ public:
 			}
 		}
 
-		m_Texture->Bind(0);
-		Usagi::Renderer::Submit(m_textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		auto TextureShader = m_ShaderLibrary.Get("Texture");
+
+		m_Texture->Bind();
+		Usagi::Renderer::Submit(TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		m_Texture2->Bind();
+		Usagi::Renderer::Submit(TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
 		// Usagi::Renderer::Submit(m_Shader, m_VertexArray);
@@ -270,13 +239,15 @@ public:
 	}*/
 
 private:
+	Usagi::ShaderLibrary m_ShaderLibrary;
 	Usagi::Ref<Usagi::Shader> m_Shader;					    //@@ shader and VAs
 	Usagi::Ref<Usagi::VertexArray> m_VertexArray;
 
-	Usagi::Ref<Usagi::Shader> m_flatColorShader, m_textureShader;
+	Usagi::Ref<Usagi::Shader> m_flatColorShader;
 	Usagi::Ref<Usagi::VertexArray> m_SquareVA;
 
 	Usagi::Ref<Usagi::Texture2D> m_Texture;
+	Usagi::Ref<Usagi::Texture2D> m_Texture2;
 
 	Usagi::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0.0f,0.0f,0.0f };

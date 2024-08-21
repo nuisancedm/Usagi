@@ -18,29 +18,27 @@ namespace Usagi {
 		m_Width = width;
 		m_Height = height;
 
-		std::cout << "width: " << width << std::endl;
-		std::cout << "height: " << height << std::endl;
-		std::cout << "channels: " << channels << std::endl;
+		GLenum internalFormat = 0;
+		GLenum dataFormat = 0;
+		if (channels == 4) {
+			internalFormat = GL_RGBA8;
+			dataFormat = GL_RGBA;
+		}
+		else if (channels == 3) {
+			internalFormat = GL_RGB8;
+			dataFormat = GL_RGB;
+		}
+
+		USG_CORE_ASSERT(internalFormat & dataFormat, "image format not supported")
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		if (channels == 3) {
-			glTextureStorage2D(m_RendererID, 1, GL_RGB8, m_Width, m_Height);
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, data);
-		}
-		else if (channels == 4) {
-			glTextureStorage2D(m_RendererID, 1, GL_RGBA8, m_Width, m_Height);
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		}
-		else {
-			USG_CORE_ASSERT(false, "Failed to read the image!: unsupported channels counts");
-		}
-
+		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 		
-
 
 		stbi_image_free(data);
 	}
