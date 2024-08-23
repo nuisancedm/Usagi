@@ -1,6 +1,6 @@
 #pragma once
 #include "RenderCommand.h"
-#include "usagi/Renderer/OrthographicCamera.h"
+#include "usagi/Renderer/Camera.h"
 #include "Usagi/Renderer/Shader.h"
 
 namespace Usagi {
@@ -11,6 +11,7 @@ namespace Usagi {
 
 		static void Init();
 		static void BeginScene(OrthographicCamera& camera);
+		static void BeginScene(ProjectionCamera& camera);
 		static void EndScene();
 
 		static void Submit(

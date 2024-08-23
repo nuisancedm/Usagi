@@ -5,21 +5,21 @@
 
 namespace Usagi {
 	
-	VertexBuffer* VertexBuffer::Create(float* vertices, uint32_t size) 
+	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size) 
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::NONE: 
 			USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet.");
 			return nullptr;
-		case RendererAPI::API::OPENGL: return new OpenGLVertexBuffer(vertices, size);
+		case RendererAPI::API::OPENGL: return std::make_shared<OpenGLVertexBuffer>(vertices, size);
 		}
 
 		USG_CORE_ASSERT(false, "Unknown Renderer API");
 		return nullptr;
 	}
 
-	IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t count) 
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count) 
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -27,7 +27,7 @@ namespace Usagi {
 			USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet.");
 			return nullptr;
 		case RendererAPI::API::OPENGL:
-			return new OpenGLIndexBuffer(indices, count);
+			return   std::make_shared<OpenGLIndexBuffer>(indices, count);
 		}
 
 		USG_CORE_ASSERT(false, "Unknown Renderer API");

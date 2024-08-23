@@ -13,6 +13,11 @@ namespace Usagi {
 	void Renderer::BeginScene(OrthographicCamera& camera) {
 		m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
+
+	void Renderer::BeginScene(ProjectionCamera& camera) {
+		m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+	}
+
 	void Renderer::EndScene() {}
 
 	void Renderer::Submit(

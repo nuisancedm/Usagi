@@ -51,7 +51,7 @@
 #include "Usagi/Renderer/VertexArray.h"
 #include "Usagi/Renderer/Texture.h"
 
-#include "Usagi/Renderer/OrthographicCamera.h"
+#include "Usagi/Renderer/Camera.h"
 // -----------------------------------
 
 

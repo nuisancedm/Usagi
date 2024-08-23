@@ -5,7 +5,7 @@
 
 #include "platform/OpenGL/OpenGLShader.h"
 #include "glm/gtc/type_ptr.hpp"
-
+#include <glm/glm.hpp>
 
 class ExampleLayer : public Usagi::Layer {
 public:
@@ -14,30 +14,26 @@ public:
 		m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), 
 		m_CameraPosition(0.0f)
 	{	
-		float vertices[3 * 7] = {                                            //@@ vertices data
+		float vertices[3 * 7] = {                                            
 			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f
 		};
-		unsigned int indices[3] = { 0,1,2 };                                 //@@ indice data  
+		unsigned int indices[3] = { 0,1,2 };                                  
 
+		m_VertexArray = Usagi::VertexArray::create();                         
 
-		m_VertexArray.reset(Usagi::VertexArray::create());                          //@@ reset VA smart pointer, VA is a member of Application.
-
-		Usagi::Ref<Usagi::VertexBuffer> vertexBuffer;                          //@@ init VB's smart pointer, VB is not a member of Application
-		vertexBuffer.reset(Usagi::VertexBuffer::Create(vertices, sizeof(vertices)));//@@ reset VB smart pointer
-		Usagi::BufferLayout layout =                                                //@@ define the layout of the VB
+		Usagi::Ref<Usagi::VertexBuffer> vertexBuffer = Usagi::VertexBuffer::Create(vertices, sizeof(vertices));
+		Usagi::BufferLayout layout =                                               
 		{
 			{Usagi::ShaderDataType::Float3, "a_Position"},
 			{Usagi::ShaderDataType::Float4, "a_Color"}
 		};
-		vertexBuffer->SetLayout(layout);                                     //@@ set the layout for VB
-		m_VertexArray->AddVertexBuffer(vertexBuffer);                        //@@ feed the VB to VA
+		vertexBuffer->SetLayout(layout);                                     
+		m_VertexArray->AddVertexBuffer(vertexBuffer);                       
 
-
-		Usagi::Ref<Usagi::IndexBuffer> indexBuffer;                            //@@ init IB's smart pointer, IB is not a member of Application
-		indexBuffer.reset(Usagi::IndexBuffer::Create(indices, 3));                  //@@ reset IB smart pointer
-		m_VertexArray->SetIndexBuffer(indexBuffer);                          //@@ feed the IB to VA
+		Usagi::Ref<Usagi::IndexBuffer> indexBuffer = Usagi::IndexBuffer::Create(indices, 3);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 
 		float squareVertices[5 * 4] = {
@@ -49,10 +45,10 @@ public:
 
 		unsigned int squareIndices[6] = { 0,1,2,2,3,0 };
 
-		m_SquareVA.reset(Usagi::VertexArray::create());
+		m_SquareVA = Usagi::VertexArray::create();
 
-		Usagi::Ref<Usagi::VertexBuffer> squareVB;
-		squareVB.reset(Usagi::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		Usagi::Ref<Usagi::VertexBuffer> squareVB = Usagi::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+
 		Usagi::BufferLayout squareLayout = {
 			{Usagi::ShaderDataType::Float3, "a_Position"},
 			{Usagi::ShaderDataType::Float2, "a_TexCoord"}
@@ -60,75 +56,11 @@ public:
 		squareVB->SetLayout(squareLayout);
 		m_SquareVA->AddVertexBuffer(squareVB);
 
-		Usagi::Ref<Usagi::IndexBuffer> squareIB;
-		squareIB.reset(Usagi::IndexBuffer::Create(squareIndices, 6));
+		Usagi::Ref<Usagi::IndexBuffer> squareIB = Usagi::IndexBuffer::Create(squareIndices, 6);
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-		std::string vertexSource = R"(
-			#version 330 core
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec4 a_Color;
-
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-
-			out vec3 v_Position;		
-			out vec4 v_Color;		
-	
-	
-			void main()
-			{
-				v_Position = a_Position;
-				v_Color = a_Color;
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-			}
-		)";
-		std::string fragmentSource = R"(
-			#version 330 core
-			layout(location = 0) out vec4 color;
-			in vec3 v_Position;
-			in vec4 v_Color;
-	
-			void main()
-			{
-				color = v_Color;
-			}
-		)";
-
-		m_Shader = Usagi::Shader::create("VertexPosColor", vertexSource, fragmentSource);
-
-		std::string flatColorVertexSource = R"(
-			#version 330 core
-			layout(location = 0) in vec3 a_Position;		
-			
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-
-			out vec3 v_Position;
-			
-			
-			void main()
-			{
-				v_Position = a_Position;
-				gl_Position = u_ViewProjection * u_Transform * vec4(v_Position, 1.0);
-			}
-		)";
-
-		std::string flatColorFragmentSource = R"(
-			#version 330 core
-			layout(location = 0) out vec4 color;
-			
-			in vec3 v_Position;
-			uniform	vec3 u_Color;		
-
-			void main()
-			{
-				color = vec4(u_Color, 1.0);
-			}
-		)";
-
-		m_flatColorShader = Usagi::Shader::create("FlatColor", flatColorVertexSource, flatColorFragmentSource);
-
+		m_ShaderLibrary.Load("assets/shaders/FlatColor.glsl");
+		m_ShaderLibrary.Load("assets/shaders/TriangleVertexColor.glsl");
 		auto TextureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 		m_Texture = Usagi::Texture2D::Create("assets/textures/usagi3.png");
@@ -140,9 +72,9 @@ public:
 
 	void OnUpdate(Usagi::Timestep ts) override {
 
-		/*USG_TRACE("Delta time:{0} s, ({1} ms)", ts.GetSeconds(), ts.GetMilliseconds());*/
-
+		// USG_TRACE("Delta time:{0} s, ({1} ms)", ts.GetSeconds(), ts.GetMilliseconds());
 		// USG_INFO("ExampleLayer::Update")
+
 		if (Usagi::Input::IsKeyPressed(USG_KEY_TAB)) 
 			USG_TRACE("Tab Key is pressed (polling)");
 		
@@ -172,27 +104,33 @@ public:
 
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
 
-		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_flatColorShader)->Bind();
-		std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_flatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+		auto flatColorShader = m_ShaderLibrary.Get("FlatColor");
+		auto TextureShader = m_ShaderLibrary.Get("Texture");
+		auto TriangleVertexColorShader = m_ShaderLibrary.Get("TriangleVertexColor");
+
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(flatColorShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(flatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
 		
 
+		// Tile map
 		for (int y = 0; y < 10; y++) {
 			for (int i = 0; i < 10; i++) {
 				glm::vec3 pos(i * 0.11f, y*0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				Usagi::Renderer::Submit(m_flatColorShader, m_SquareVA, transform);
+				Usagi::Renderer::Submit(flatColorShader, m_SquareVA, transform);
 			}
 		}
 
-		auto TextureShader = m_ShaderLibrary.Get("Texture");
-
+		// usagi
 		m_Texture->Bind();
 		Usagi::Renderer::Submit(TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-		m_Texture2->Bind();
-		Usagi::Renderer::Submit(TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		
+		// C logo
+		 m_Texture2->Bind(); 
+		 Usagi::Renderer::Submit(TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
-		// Usagi::Renderer::Submit(m_Shader, m_VertexArray);
+		// Usagi::Renderer::Submit(TriangleVertexColorShader, m_VertexArray);
 
 		Usagi::Renderer::EndScene();
 		
@@ -221,29 +159,27 @@ public:
 		dispatcher.Dispatch<Usagi::KeyPressedEvent>(USG_BIND_EVENT_FN(ExampleLayer::OnKeyPressedEvent));*/
 	}
 
-	/*bool OnKeyPressedEvent(Usagi::KeyPressedEvent& event) {
+	bool OnKeyPressedEvent(Usagi::KeyPressedEvent& event) {
 		if (event.GetKeyCode() == USG_KEY_LEFT) 
-			m_CameraPosition.x -= m_CameraSpeed;
+			m_CameraPosition.x -= m_CameraMoveSpeed;
 	
 		if (event.GetKeyCode() == USG_KEY_RIGHT) 
-			m_CameraPosition.x += m_CameraSpeed;
+			m_CameraPosition.x += m_CameraMoveSpeed;
 
 		if (event.GetKeyCode() == USG_KEY_DOWN)
-			m_CameraPosition.y -= m_CameraSpeed;
+			m_CameraPosition.y -= m_CameraMoveSpeed;
 
 		if (event.GetKeyCode() == USG_KEY_UP)
-			m_CameraPosition.y += m_CameraSpeed;
+			m_CameraPosition.y += m_CameraMoveSpeed;
 		
 		
 		return false;
-	}*/
+	}
 
 private:
 	Usagi::ShaderLibrary m_ShaderLibrary;
-	Usagi::Ref<Usagi::Shader> m_Shader;					    //@@ shader and VAs
-	Usagi::Ref<Usagi::VertexArray> m_VertexArray;
 
-	Usagi::Ref<Usagi::Shader> m_flatColorShader;
+	Usagi::Ref<Usagi::VertexArray> m_VertexArray;
 	Usagi::Ref<Usagi::VertexArray> m_SquareVA;
 
 	Usagi::Ref<Usagi::Texture2D> m_Texture;
@@ -253,19 +189,87 @@ private:
 	glm::vec3 m_CameraPosition = { 0.0f,0.0f,0.0f };
 	float m_CameraRotation = 0.0f;
 	
-	float m_CameraMoveSpeed = 5.0f; // unit per second
-	float m_CameraRotationSpeed = 180.0f; // degree per second
+	float m_CameraMoveSpeed = 5.0f; 
+	float m_CameraRotationSpeed = 180.0f;
 
 	glm::vec3 m_SquareColor = { 0.2f,0.3f,0.8f };
 
 
 };
 
+class LearnOpenGL : public Usagi::Layer{
+public:
 
-class Sandbox :public Usagi::Application {
+	LearnOpenGL() 
+		:m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
+	{
+		// data vertices and indices;
+		float squareVertices[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+		};
+		unsigned int squareIndices[6] = { 0,1,2,2,3,0 };
+
+		// create VA, VA is a member
+		m_VA = Usagi::VertexArray::create();
+
+		// create VB VBLayout IB only active in the scope 
+		Usagi::Ref<Usagi::VertexBuffer> vertexBuffer = Usagi::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+		Usagi::BufferLayout squareLayout = {
+			{Usagi::ShaderDataType::Float3, "a_Position"},
+			{Usagi::ShaderDataType::Float2, "a_TexCoord"}
+		};
+		vertexBuffer->SetLayout(squareLayout);
+		Usagi::Ref<Usagi::IndexBuffer> indexBuffer = Usagi::IndexBuffer::Create(squareIndices, 6);
+
+		// add VB IB for VA
+		m_VA->AddVertexBuffer(vertexBuffer);
+		m_VA->SetIndexBuffer(indexBuffer);
+
+		// loadShader
+		m_ShaderLibrary.Load("assets/shaders/first3D.glsl");
+
+		// loadTexture
+		m_Texture = Usagi::Texture2D::Create("assets/textures/usagi3.png");
+
+		// bind static uniform for a shader
+		auto first3DShader = m_ShaderLibrary.Get("first3D");
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(first3DShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(first3DShader)->UploadUniformInt("u_Texture", 0);
+
+	}
+
+	void OnUpdate(Usagi::Timestep ts) override {
+
+		m_Camera.Update();
+		Usagi::RenderCommand::SetClearColor({ 0.15, 0.15, 0.15, 1 });
+		Usagi::RenderCommand::Clear();
+
+		Usagi::Renderer::BeginScene(m_Camera);
+
+		auto first3DShader = m_ShaderLibrary.Get("first3D");
+		m_Texture->Bind();
+		Usagi::Renderer::Submit(first3DShader, m_VA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	}
+		
+	
+private:
+	Usagi::ProjectionCamera m_Camera;
+
+	Usagi::ShaderLibrary m_ShaderLibrary;
+	
+	Usagi::Ref<Usagi::VertexArray> m_VA;
+	Usagi::Ref<Usagi::Texture2D> m_Texture;
+
+};
+
+class Sandbox : public Usagi::Application {
 public:
 	Sandbox() {
-		PushLayer(new ExampleLayer());
+		// PushLayer(new ExampleLayer());
+		PushLayer(new LearnOpenGL());
 	}
 	~Sandbox() {}
 
