@@ -32,4 +32,3 @@ namespace Usagi {
 #define USG_WARN(...)		::Usagi::Log::GetClientLogger() -> warn(__VA_ARGS__)
 #define USG_INFO(...)		::Usagi::Log::GetClientLogger() -> info(__VA_ARGS__)
 #define USG_TRACE(...)		::Usagi::Log::GetClientLogger() -> trace(__VA_ARGS__)
-

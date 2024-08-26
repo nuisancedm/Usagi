@@ -17,7 +17,6 @@ IncludeDir["ImGui"] = "Usagi/vendor/imgui"
 IncludeDir["glm"] = "Usagi/vendor/glm"
 IncludeDir["stb_image"] = "Usagi/vendor/stb_image"
 
-
 include "Usagi/vendor/GLFW"
 include "Usagi/vendor/Glad"
 include "Usagi/vendor/imgui"
@@ -48,6 +47,7 @@ project "Usagi"
     includedirs{
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include", 
+        "%{prj.name}/vendor/assimp/include",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
@@ -115,7 +115,8 @@ project "Sandbox"
     }
 
     links{
-        "Usagi"
+        "Usagi",
+        "Usagi/vendor/assimp/win64/assimp-vc143-mtd.lib",
     }
 
     filter "system:windows"
@@ -136,4 +137,4 @@ project "Sandbox"
     filter "configurations:Dist"
         defines "USG_DIST"
         runtime "Release"
-        optimize "on"
+        optimize "on" 

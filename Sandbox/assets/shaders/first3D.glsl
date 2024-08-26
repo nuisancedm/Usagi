@@ -1,7 +1,10 @@
 #type vertex
 #version 330 core
 layout(location = 0) in vec3 a_Position;		
-layout(location = 1) in vec2 a_TexCoords;		
+layout(location = 1) in vec3 a_Normal;		
+layout(location = 2) in vec3 a_Tangent;		
+layout(location = 3) in vec3 a_Binormal;		
+layout(location = 4) in vec2 a_TexCoords;		
 			
 uniform mat4 u_Transform;
 uniform mat4 u_ViewProjection;
@@ -18,7 +21,7 @@ void main()
 
 #type fragment
 #version 330 core
-layout(location = 0) out vec4 color;
+out vec4 color;
 
 in vec2 v_TexCoords;	
 uniform sampler2D u_Texture;

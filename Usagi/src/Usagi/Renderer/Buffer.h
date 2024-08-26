@@ -72,6 +72,12 @@ namespace Usagi {
 			CalculateOffsetsAndStride();
 		}
 
+		BufferLayout(const std::vector<BufferElement>& elements)
+			:m_Elements(elements)
+		{
+			CalculateOffsetsAndStride();
+		}
+
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 	
 		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
