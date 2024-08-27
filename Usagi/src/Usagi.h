@@ -53,6 +53,7 @@
 #include "Usagi/Renderer/Mesh.h"
 
 #include "Usagi/Renderer/Camera.h"
+#include "Usagi/Renderer/Light.h"
 // -----------------------------------
 
 

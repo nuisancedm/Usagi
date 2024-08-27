@@ -12,7 +12,8 @@ class LearnOpenGL : public Usagi::Layer {
 public:
 
 	LearnOpenGL()
-		:m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
+		:m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f)),
+		m_Light(glm::vec3(100.0f,100.0f,100.0f), glm::vec3(1.0f,1.0f,1.0f))
 	{
 		// data vertices and indices;
 		float squareVertices[14 * 4] = {
@@ -45,6 +46,8 @@ public:
 
 		// loadShader
 		m_ShaderLibrary.Load("assets/shaders/first3D.glsl");
+		m_ShaderLibrary.Load("assets/shaders/LearnOpenGLShaders/lightShader.glsl");
+		m_ShaderLibrary.Load("assets/shaders/LearnOpenGLShaders/PhongShader.glsl");
 
 		// loadTexture
 		m_Texture_usagi3 = Usagi::Texture2D::Create("assets/textures/usagi3.png");
@@ -55,8 +58,14 @@ public:
 		std::dynamic_pointer_cast<Usagi::OpenGLShader>(first3DShader)->Bind();
 		std::dynamic_pointer_cast<Usagi::OpenGLShader>(first3DShader)->UploadUniformInt("u_Texture", 0);
 
+		auto lightShader = m_ShaderLibrary.Get("lightShader");
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(lightShader)->Bind();
+		std::dynamic_pointer_cast<Usagi::OpenGLShader>(lightShader)->UploadUniformFloat3("u_lightColor", m_Light.getColor());
+
+
 		m_SphereMesh.reset(new Usagi::Mesh("assets/models/Sphere.fbx"));
 		m_CerberusMesh.reset(new Usagi::Mesh("assets/models/Cerberus.fbx"));
+		m_CubeMesh.reset(new Usagi::Mesh("assets/models/Cube.fbx"));
 	}
 
 	void OnUpdate(Usagi::Timestep ts) override {
@@ -84,13 +93,35 @@ public:
 										glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
 										glm::scale(glm::mat4(1.0f), glm::vec3(50.0f));
 
+		glm::mat4 transformMatrix_Light = glm::translate(glm::mat4(1.0f), m_Light.getPosition()) *
+										glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+										glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
+
+		auto PhongShader = std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_ShaderLibrary.Get("PhongShader")); 
+		PhongShader->Bind();
+		PhongShader->UploadUniformFloat3("u_lightColor", m_Light.getColor());
+		PhongShader->UploadUniformFloat3("u_lightPosition", m_Light.getPosition());
+		PhongShader->UploadUniformFloat3("u_viewPosition", m_Camera.GetPosition());
+		PhongShader->UploadUniformMat3("u_NormalMatrix", glm::mat3(glm::transpose(glm::inverse(transformMatrix_Cerberus))));
+
 		// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BEGIN SCENE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		{
 			m_Texture_Cerberus_A->Bind();
-			Usagi::Renderer::Submit(first3DShader, m_SphereMesh->getVertexArray(), transformMatrix_Sphere);
-			Usagi::Renderer::Submit(first3DShader, m_CerberusMesh->getVertexArray(), transformMatrix_Cerberus);
-			Usagi::Renderer::Submit(first3DShader, m_VA_rectangle, transformMatrix_rectangle);
+			
+			// Sphere
+			// Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_SphereMesh->getVertexArray(), transformMatrix_Sphere);
+			
+			// Cerberus
+			// Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_CerberusMesh->getVertexArray(), transformMatrix_Cerberus);
+			
+			// Rectangle
+			//Usagi::Renderer::Submit(first3DShader, m_VA_rectangle, transformMatrix_rectangle);
+			
+			// Cube
+			Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_CubeMesh->getVertexArray(), glm::mat4(1.0f));
 
+			// Light
+			Usagi::Renderer::Submit(m_ShaderLibrary.Get("lightShader"), m_SphereMesh->getVertexArray(), transformMatrix_Light);
 		}
 		// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  END SCENE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		Usagi::Renderer::EndScene();
@@ -98,15 +129,17 @@ public:
 
 
 private:
+
 	Usagi::ProjectionCamera m_Camera;
 	Usagi::ShaderLibrary m_ShaderLibrary;
+	Usagi::Light m_Light;
 
 	Usagi::Scope<Usagi::Mesh> m_SphereMesh;
 	Usagi::Scope<Usagi::Mesh> m_CerberusMesh;
+	Usagi::Scope<Usagi::Mesh> m_CubeMesh;
 
 	Usagi::Ref<Usagi::VertexArray> m_VA_rectangle;
 
 	Usagi::Ref<Usagi::Texture2D> m_Texture_usagi3;
 	Usagi::Ref<Usagi::Texture2D> m_Texture_Cerberus_A;
-
 };
