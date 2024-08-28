@@ -47,6 +47,7 @@
 #include "Usagi/Renderer/RenderCommand.h"
 
 #include "Usagi/Renderer/Buffer.h"
+#include "Usagi/Renderer/FrameBuffer.h"
 #include "Usagi/Renderer/Shader.h"
 #include "Usagi/Renderer/VertexArray.h"
 #include "Usagi/Renderer/Texture.h"

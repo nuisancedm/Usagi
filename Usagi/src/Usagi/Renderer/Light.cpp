@@ -2,13 +2,10 @@
 #include "Light.h"
 
 namespace Usagi {
-	Light::Light(glm::vec3 position, glm::vec3 color) 
-		:m_Position(position), m_Color(color)
+	PointLight::PointLight(const glm::vec3& position, const glm::vec3& color, float intensity)
+		:Light(color, intensity), m_Position(position), m_AttenuationParams(glm::vec3(1.0, 0.0014, 0.000007))
 	{
-		
+
 	}
-	Light::Light() {
-		m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		m_Color = glm::vec3(1.0f, 1.0f, 1.0f);
-	}
+
 }

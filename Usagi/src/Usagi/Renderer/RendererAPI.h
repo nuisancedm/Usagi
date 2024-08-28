@@ -2,7 +2,11 @@
 
 #include <glm/glm.hpp>
 #include "VertexArray.h"
+
 namespace Usagi {
+
+	using RendererID = uint32_t;
+
 	class RendererAPI {
 	public:
 		enum class API {

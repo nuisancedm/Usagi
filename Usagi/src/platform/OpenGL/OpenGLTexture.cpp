@@ -28,6 +28,10 @@ namespace Usagi {
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
 		}
+		else if (channels == 1) {
+			internalFormat = GL_R8;
+			dataFormat = GL_RED;
+		}
 
 		USG_CORE_ASSERT(internalFormat & dataFormat, "image format not supported")
 

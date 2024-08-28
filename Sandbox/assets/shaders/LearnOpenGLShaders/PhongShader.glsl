@@ -28,34 +28,51 @@ void main()
 #version 330 core
 out vec4 color;
 
+struct Material {
+    vec3 ambient;
+    sampler2D diffuse;
+    sampler2D specular;
+    float shininess;
+}; 
+
+struct PointLight {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+	vec3 attenuationParams;
+};
+
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec2 v_TexCoords;	
 
-uniform vec3 u_lightColor;
-uniform vec3 u_lightPosition;
 uniform vec3 u_viewPosition;
-
-uniform sampler2D u_Texture;
+uniform PointLight pointLight;
+uniform Material material;
 
 void main()
 {
-	float ambientStrength = 0.1;
-	vec3 ambient =  ambientStrength * u_lightColor; 
+	vec3 ambient =  vec3(texture(material.diffuse, v_TexCoords)) * pointLight.ambient; 
 
 	vec3 f_Normal = normalize(v_Normal);
-	vec3 lightDir = normalize(u_lightPosition - v_FragPos);
+	vec3 lightDir = normalize(pointLight.position - v_FragPos);
 	float diff = max(dot(f_Normal, lightDir), 0.0);
-	vec3 diffuse = diff * u_lightColor;
+	vec3 diffuse = vec3(texture(material.diffuse, v_TexCoords)) * diff *  pointLight.diffuse;
 
-	float specularStrength = 0.5;
 	vec3 viewDir = normalize(u_viewPosition - v_FragPos);
 	vec3 reflectDir = reflect(-lightDir, f_Normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);
-	vec3 specular = specularStrength * spec * u_lightColor;
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	vec3 specular = vec3(texture(material.specular, v_TexCoords)).rrr * spec * pointLight.specular;
 
-	color = texture(u_Texture, v_TexCoords) * vec4(ambient + diffuse + specular, 1.0f);
+	float distance = length(pointLight.position - v_FragPos);
+	float attenuation = 1.0 / (pointLight.attenuationParams.x + pointLight.attenuationParams.y * distance + 
+					pointLight.attenuationParams.z * (distance * distance));
+
+	color = vec4(attenuation*(ambient + diffuse + specular), 1.0f);
 
 	// DEBUG
-	// color = texture(u_Texture, v_TexCoords);
+	// color = vec4(pointLight.attenuationParams.x, pointLight.attenuationParams.y, pointLight.attenuationParams.z, 1.0f);
 }
