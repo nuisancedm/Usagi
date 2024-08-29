@@ -15,8 +15,6 @@ public:
 		:m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f)),
 		m_PointLight(glm::vec3(30.0f,30.0f,30.0f), glm::vec3(1.0f,1.0f,1.0f), 1.0f)
 	{
-		Usagi::RenderCommand::SetClearColor({ 0.15, 0.15, 0.15, 1 });
-
 		// quad vertices and indices for framebuffer;
 		float quadVertices[5 * 4] = {
 			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
@@ -49,11 +47,22 @@ public:
 		m_ShaderLibrary.Load("assets/shaders/hdr.glsl");
 		m_ShaderLibrary.Load("assets/shaders/LearnOpenGLShaders/lightShader.glsl");
 		m_ShaderLibrary.Load("assets/shaders/LearnOpenGLShaders/PhongShader.glsl");
+		m_ShaderLibrary.Load("assets/shaders/LearnOpenGLShaders/Skybox.glsl");
 
 		// load Textures
 		m_Texture_usagi3 = Usagi::Texture2D::Create("assets/textures/usagi3.png");
 		m_Texture_Cerberus_A = Usagi::Texture2D::Create("assets/textures/cerberus/cerberus_A.png");
 		m_Texture_Cerberus_R = Usagi::Texture2D::Create("assets/textures/cerberus/cerberus_R.png");
+		std::vector<std::string> cubepaths= {
+			"assets/textures/skybox/right.jpg",
+			"assets/textures/skybox/left.jpg",
+			"assets/textures/skybox/top.jpg",
+			"assets/textures/skybox/bottom.jpg",
+			"assets/textures/skybox/front.jpg",
+			"assets/textures/skybox/back.jpg"
+		};
+		// m_CubeTexture_Pinetree = Usagi::TextureCube::Create("assets/textures/skybox_pinetree/Arches_E_PineTree_Radiance.tga");
+		m_CubeTexture_Pinetree = Usagi::TextureCube::Create(cubepaths);
 
 		// Load Meshs
 		m_SphereMesh.reset(new Usagi::Mesh("assets/models/Sphere.fbx"));
@@ -63,6 +72,8 @@ public:
 
 	void OnUpdate(Usagi::Timestep ts) override {
 		// USG_INFO("FPS:{0})", 1000/ts.GetMilliseconds());
+		Usagi::RenderCommand::SetClearColor({ m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3] });
+
 		//update camera
 		m_Camera.Update();
 
@@ -107,20 +118,29 @@ public:
 		PhongShader->UploadUniformFloat3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		PhongShader->UploadUniformFloat3("pointLight.attenuationParams", m_PointLight.getAttenuation());
 
+		auto skyboxShader = std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_ShaderLibrary.Get("Skybox"));
+		skyboxShader->Bind();
+		skyboxShader->UploadUniformInt("skybox", 2);
+		skyboxShader->UploadUniformMat4("u_View", glm::mat4(glm::mat3(m_Camera.GetViewMatrix())));
+		skyboxShader->UploadUniformMat4("u_Projection", m_Camera.GetProjectionMatrix());
+
 		// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BEGIN SCENE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		{
 			m_Texture_Cerberus_A->Bind(0);
 			m_Texture_Cerberus_R->Bind(1);
+			m_CubeTexture_Pinetree->Bind(2);
 			
+			// Cube
+			Usagi::RenderCommand::SetDepthMask(false);
+			Usagi::Renderer::Submit(m_ShaderLibrary.Get("Skybox"), m_CubeMesh->getVertexArray(), glm::mat4(1.0f));
+			Usagi::RenderCommand::SetDepthMask(true);
+
 			// Sphere
 			// Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_SphereMesh->getVertexArray(), transformMatrix_Sphere);
 			
 			// Cerberus
-			Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_CerberusMesh->getVertexArray(), transformMatrix_Cerberus);
+			 Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_CerberusMesh->getVertexArray(), transformMatrix_Cerberus);
 			
-			// Cube
-			// Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_CubeMesh->getVertexArray(), glm::mat4(1.0f));
-
 			// Light
 			Usagi::Renderer::Submit(m_ShaderLibrary.Get("lightShader"), m_SphereMesh->getVertexArray(), transformMatrix_Light);
 		}
@@ -186,9 +206,8 @@ public:
 
 		// Editor Panel ------------------------------------------------------------------------------
 		ImGui::Begin("Settings");
-
-		// ImGui::Separator();
-
+		ImGui::ColorEdit3("Clear Color", m_ClearColor);
+		ImGui::Separator();
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -200,7 +219,6 @@ public:
 		ImGui::Image((void*)m_FinalPresentBuffer->GetColorAttachmentRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
 		ImGui::End();
 		ImGui::PopStyleVar();
-
 		ImGui::End();
 	}
 
@@ -221,6 +239,7 @@ private:
 	Usagi::Ref<Usagi::Texture2D> m_Texture_usagi3;
 	Usagi::Ref<Usagi::Texture2D> m_Texture_Cerberus_A;
 	Usagi::Ref<Usagi::Texture2D> m_Texture_Cerberus_R;
+	Usagi::Ref<Usagi::TextureCube> m_CubeTexture_Pinetree;
 
-	float m_ClearColor[4];
+	float m_ClearColor[4] = { 0.1f,0.1f,0.1f,1.0f };
 };

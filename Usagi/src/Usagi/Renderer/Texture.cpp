@@ -13,4 +13,24 @@ namespace Usagi {
 		USG_CORE_ASSERT(false, "Unknown Renderer API");
 		return nullptr;
 	}
+
+	Ref<TextureCube> TextureCube::Create(const std::string& filepath) {
+		switch (Renderer::GetAPI()) {
+		case RendererAPI::API::NONE:   USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet."); return nullptr;
+		case RendererAPI::API::OPENGL: return  std::make_shared<OpenGLTextureCube>(filepath);
+		}
+
+		USG_CORE_ASSERT(false, "Unknown Renderer API");
+		return nullptr;
+	}
+
+	Ref<TextureCube> TextureCube::Create(const std::vector<std::string>& filepaths) {
+		switch (Renderer::GetAPI()) {
+		case RendererAPI::API::NONE:   USG_CORE_ASSERT(false, "RendererAPI::NONE is not supported yet."); return nullptr;
+		case RendererAPI::API::OPENGL: return  std::make_shared<OpenGLTextureCube>(filepaths);
+		}
+
+		USG_CORE_ASSERT(false, "Unknown Renderer API");
+		return nullptr;
+	}
 }

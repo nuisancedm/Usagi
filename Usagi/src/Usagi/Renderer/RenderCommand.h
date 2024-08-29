@@ -19,6 +19,10 @@ namespace Usagi {
 		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray) {
 			s_RendererAPI->DrawIndexed(vertexArray);
 		}
+
+		inline static void SetDepthMask(bool flag) {
+			s_RendererAPI->SetDepthMask(flag);
+		}
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

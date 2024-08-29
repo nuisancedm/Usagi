@@ -20,14 +20,6 @@ namespace Usagi
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 		USG_CORE_ASSERT(status, "Failed to initialize Glad!");
-
-		// --- device info ---
-		USG_CORE_INFO("OpenGL Info:");
-		USG_CORE_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));
-		USG_CORE_INFO("  Renderer: {0}", (const char*)glGetString(GL_RENDERER));
-		USG_CORE_INFO("  Version: {0}", (const char*)glGetString(GL_VERSION));
-
-
 	}
 
 	void OpenGLContext::SwapBuffers()

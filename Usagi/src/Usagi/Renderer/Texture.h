@@ -15,4 +15,11 @@ namespace Usagi {
 	public:
 		static Ref<Texture2D> Create(const std::string& filepath);
 	};
+
+	class TextureCube : public Texture
+	{
+	public:
+		static Ref<TextureCube> Create(const std::string& filepath);
+		static Ref<TextureCube> Create(const std::vector<std::string>& filepaths);
+	};
 }

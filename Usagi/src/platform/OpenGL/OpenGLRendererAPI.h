@@ -10,6 +10,7 @@ namespace Usagi {
 		virtual void Clear() override;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) override;
+		virtual void SetDepthMask(bool flag) override;
 	private:
 	};
 }
