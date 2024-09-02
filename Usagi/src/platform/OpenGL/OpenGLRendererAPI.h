@@ -9,8 +9,9 @@ namespace Usagi {
 		virtual void SetClearColor(const glm::vec4& color) override;
 		virtual void Clear() override;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) override;
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, bool enableDepthTesting) override;
 		virtual void SetDepthMask(bool flag) override;
+		virtual void SetDepthFn(DepthFnType type) override;
 	private:
 	};
 }

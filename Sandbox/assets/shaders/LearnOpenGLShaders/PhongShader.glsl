@@ -63,8 +63,12 @@ void main()
 	vec3 diffuse = vec3(texture(material.diffuse, v_TexCoords)) * diff *  pointLight.diffuse;
 
 	vec3 viewDir = normalize(u_viewPosition - v_FragPos);
-	vec3 reflectDir = reflect(-lightDir, f_Normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	//  ============= PHONG LIGHTING ============
+	// vec3 reflectDir = reflect(-lightDir, f_Normal);
+	// float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	// ============== BLING PHONG LIGHTING ============
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float spec = pow(max(dot(f_Normal, halfwayDir), 0.0), material.shininess);
 	vec3 specular = vec3(texture(material.specular, v_TexCoords)).rrr * spec * pointLight.specular;
 
 	float distance = length(pointLight.position - v_FragPos);
@@ -72,7 +76,4 @@ void main()
 					pointLight.attenuationParams.z * (distance * distance));
 
 	color = vec4(attenuation*(ambient + diffuse + specular), 1.0f);
-
-	// DEBUG
-	// color = vec4(pointLight.attenuationParams.x, pointLight.attenuationParams.y, pointLight.attenuationParams.z, 1.0f);
 }

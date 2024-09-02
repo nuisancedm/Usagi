@@ -13,6 +13,9 @@ namespace Usagi {
 			NONE = 0,
 			OPENGL = 1,
 		};
+		enum DepthFnType {
+			ALWAYS, NEVER, LESS, EQUAL, LEQUAL, GREATER, NOTEQUAL, GEQUAL
+		};
 
 		struct RenderAPICapabilities
 		{
@@ -30,8 +33,9 @@ namespace Usagi {
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, bool enableDepthTesting) = 0;
 		virtual void SetDepthMask(bool flag) = 0;
+		virtual void SetDepthFn(DepthFnType flag) = 0;
 
 		static RenderAPICapabilities& GetCapabilities()
 		{

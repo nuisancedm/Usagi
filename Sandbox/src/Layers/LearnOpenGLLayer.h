@@ -113,9 +113,9 @@ public:
 		PhongShader->UploadUniformInt("material.specular", 1);
 		PhongShader->UploadUniformFloat("material.shininess", 32);
 		PhongShader->UploadUniformFloat3("pointLight.position", m_PointLight.getPosition());
-		PhongShader->UploadUniformFloat3("pointLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-		PhongShader->UploadUniformFloat3("pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-		PhongShader->UploadUniformFloat3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		PhongShader->UploadUniformFloat3("pointLight.ambient", glm::vec3(0.2f,0.2f,0.2f));
+		PhongShader->UploadUniformFloat3("pointLight.diffuse", m_PointLight.getColor() * 0.5f);
+		PhongShader->UploadUniformFloat3("pointLight.specular", m_PointLight.getColor() * 1.0f);
 		PhongShader->UploadUniformFloat3("pointLight.attenuationParams", m_PointLight.getAttenuation());
 
 		auto skyboxShader = std::dynamic_pointer_cast<Usagi::OpenGLShader>(m_ShaderLibrary.Get("Skybox"));
@@ -130,10 +130,7 @@ public:
 			m_Texture_Cerberus_R->Bind(1);
 			m_CubeTexture_Pinetree->Bind(2);
 			
-			// Cube
-			Usagi::RenderCommand::SetDepthMask(false);
-			Usagi::Renderer::Submit(m_ShaderLibrary.Get("Skybox"), m_CubeMesh->getVertexArray(), glm::mat4(1.0f));
-			Usagi::RenderCommand::SetDepthMask(true);
+			
 
 			// Sphere
 			// Usagi::Renderer::Submit(m_ShaderLibrary.Get("PhongShader"), m_SphereMesh->getVertexArray(), transformMatrix_Sphere);
@@ -143,6 +140,15 @@ public:
 			
 			// Light
 			Usagi::Renderer::Submit(m_ShaderLibrary.Get("lightShader"), m_SphereMesh->getVertexArray(), transformMatrix_Light);
+
+			// Cube
+			if (m_ShowSkybox) {
+				Usagi::RenderCommand::SetDepthFn(Usagi::RendererAPI::DepthFnType::LEQUAL);
+				Usagi::RenderCommand::SetDepthMask(false);
+				Usagi::Renderer::Submit(m_ShaderLibrary.Get("Skybox"), m_CubeMesh->getVertexArray(), glm::mat4(1.0f));
+				Usagi::RenderCommand::SetDepthMask(true);
+				Usagi::RenderCommand::SetDepthFn(Usagi::RendererAPI::DepthFnType::LESS);
+			}
 		}
 		// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  END SCENE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		Usagi::Renderer::EndScene();
@@ -206,8 +212,17 @@ public:
 
 		// Editor Panel ------------------------------------------------------------------------------
 		ImGui::Begin("Settings");
+		ImGui::Checkbox("Show Skybox", &m_ShowSkybox);
 		ImGui::ColorEdit3("Clear Color", m_ClearColor);
 		ImGui::Separator();
+		glm::vec3 lightPosition = m_PointLight.getPosition();
+		if (ImGui::DragFloat3("Light Position", &lightPosition[0], 0.1f)) {
+			m_PointLight.setPosition(lightPosition);
+		}
+		glm::vec3 lightColor = m_PointLight.getColor();
+		if(ImGui::ColorEdit3("Light Color", &lightColor[0])) {
+			m_PointLight.setColor(lightColor);
+		};
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -242,4 +257,5 @@ private:
 	Usagi::Ref<Usagi::TextureCube> m_CubeTexture_Pinetree;
 
 	float m_ClearColor[4] = { 0.1f,0.1f,0.1f,1.0f };
+	bool m_ShowSkybox = true;
 };

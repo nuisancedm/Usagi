@@ -17,7 +17,7 @@ namespace Usagi {
 		static void Submit(
 			const Ref<Shader>& shader,
 			const Ref<VertexArray>& vertexArray,
-			const glm::mat4& transform = glm::mat4(1.0f));
+			const glm::mat4& transform = glm::mat4(1.0f), bool enableDepthTesting = true);
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:

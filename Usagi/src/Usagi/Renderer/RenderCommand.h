@@ -16,13 +16,18 @@ namespace Usagi {
 			s_RendererAPI->Clear();
 		}
 		
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray) {
-			s_RendererAPI->DrawIndexed(vertexArray);
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, bool enableDepthTesting) {
+			s_RendererAPI->DrawIndexed(vertexArray, enableDepthTesting);
 		}
 
 		inline static void SetDepthMask(bool flag) {
 			s_RendererAPI->SetDepthMask(flag);
 		}
+
+		inline static void SetDepthFn(RendererAPI::DepthFnType type) {
+			s_RendererAPI->SetDepthFn(type);
+		}
+
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

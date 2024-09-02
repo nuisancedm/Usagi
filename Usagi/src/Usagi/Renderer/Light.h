@@ -9,7 +9,7 @@ namespace Usagi{
 			: m_Color(color), m_Intensity(intensity) {}
 		virtual ~Light() = default;
 
-		inline void setColor(glm::vec3 color) { m_Color = color; }
+		inline void setColor(const glm::vec3& color) { m_Color = color; }
 		inline void setIntensity(float intensity) { m_Intensity = intensity; };
 
 		inline const glm::vec3& getColor() const { return m_Color; }
